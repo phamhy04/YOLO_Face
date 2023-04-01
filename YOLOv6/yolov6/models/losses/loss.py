@@ -171,7 +171,8 @@ class ComputeLoss:
 
 
         #   ========================== Attributes loss ==========================
-        attr_loss = self.attribute_loss(attr_scores, target_attrs)
+        attr_loss = self.attribute_loss(attr_scores, target_attrs)        
+        print("  === Loss attr final: ", attr_loss)
         loss_his["attr_loss"].append(attr_loss)
         
         #   ========================== Bbox loss ==========================
@@ -232,9 +233,9 @@ class AttributeLoss(nn.Module):
         attribute_losses = []
         for j in range(batch_size):          
             attribute_loss = -(gt_score[j] * torch.log(pred_score[j]) + (1.0 - gt_score[j]) * torch.log(1.0 - pred_score[j]))
-
             # attribute_loss = torch.where(torch.ne(gt_score[j], 0.0), attribute_loss, torch.zeros(attribute_loss.shape).cuda())
             attribute_losses.append(torch.mean(attribute_loss))
+            print("  === Loss after cross entropy: ", attribute_loss)
         return torch.stack(attribute_losses).mean()
 
 
