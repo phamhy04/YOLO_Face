@@ -111,8 +111,10 @@ class Trainer:
             for self.epoch in range(self.start_epoch, self.max_epoch):
                 self.train_in_loop(self.epoch, loss_his)
                 with open("loss_his.json", 'w') as f:
-                    json.dump(loss_his, f)
-                print("============ Loss history saved!!! ============")
+                    json.dump(loss_his, f)		
+                print("      Loss history saved!!!")
+                if self.epoch == 99:
+                    break		
             self.strip_model()
 
         except Exception as _:
@@ -317,7 +319,7 @@ class Trainer:
         self.mean_loss = torch.zeros(self.loss_num, device=self.device)
         self.optimizer.zero_grad()
 
-        LOGGER.info(('\n' + '%10s' * (self.loss_num + 1)) % (*self.loss_info, ))
+        print(('\n' + '%10s' * (self.loss_num + 1)) % (*self.loss_info, ))
         self.pbar = enumerate(self.train_loader)
         if self.main_process:
             self.pbar = tqdm(self.pbar, total=self.max_stepnum, ncols=NCOLS, bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
@@ -326,7 +328,7 @@ class Trainer:
     def print_details(self):
         if self.main_process:
             self.mean_loss = (self.mean_loss * self.step + self.loss_items) / (self.step + 1)
-            self.pbar.set_description(('%10s' + '%10.4g' * self.loss_num) % (f'{self.epoch}/{self.max_epoch - 1}', \
+            self.pbar.set_description(('%10s' + '%10.4g' * self.loss_num) % (f'{self.epoch}/{100}', \
                                                                 *(self.mean_loss)))
 
     def strip_model(self):
