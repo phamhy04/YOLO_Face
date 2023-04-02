@@ -253,7 +253,7 @@ class Trainer:
                             plot_confusion_matrix=get_cfg_value(self.cfg.eval_params, "plot_confusion_matrix", False),
                             )
 
-        LOGGER.info(f"Epoch: {self.epoch} | mAP@0.5: {results[0]} | mAP@0.50:0.95: {results[1]}")
+        print(f"Epoch: {self.epoch} | mAP@0.5: {results[0]} | mAP@0.50:0.95: {results[1]}")
         self.evaluate_results = results[:2]
         # plot validation predictions
         self.plot_val_pred(vis_outputs, vis_paths)
