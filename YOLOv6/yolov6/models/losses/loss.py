@@ -44,8 +44,8 @@ class ComputeLoss:
         self.proj = nn.Parameter(torch.linspace(0, self.reg_max, self.reg_max + 1), requires_grad=False)
         self.iou_type = iou_type
         self.varifocal_loss = VarifocalLoss().cuda()
-#         self.attribute_loss = AttributeLoss().cuda()
-        self.attribute_loss = nn.BCEWithLogitsLoss()
+        self.attribute_loss = AttributeLoss().cuda()
+        # self.attribute_loss = nn.BCEWithLogitsLoss()
         self.bbox_loss = BboxLoss(self.num_classes, self.reg_max, self.use_dfl, self.iou_type).cuda()
         self.loss_weight = loss_weight       
         
@@ -176,7 +176,7 @@ class ComputeLoss:
         	loss_cls /= target_scores_sum
         loss_his["cls_loss"].append(loss_cls.detach().cpu().tolist())
 
-        #   ========================== Attributes loss ==========================
+        #   ========================== Attribute loss ==========================
         attr_loss = self.attribute_loss(attr_scores, target_attrs)  
         #   Calculate accuracy
         self.check_acc(attr_scores, target_attrs, loss_his["attr_acc"]) 
@@ -237,14 +237,9 @@ class AttributeLoss(nn.Module):
         self.gamma = 2.0
 
     def forward(self, pred_score, gt_score):
-        batch_size = pred_score.shape[0]
-        attribute_losses = []
-        for j in range(batch_size): 
-            pred_score = torch.sigmoid(pred_score)         
-            attribute_loss = -(gt_score[j] * torch.log(pred_score[j]) + (1.0 - gt_score[j]) * torch.log(1.0 - pred_score[j]))
-            # attribute_loss = torch.where(torch.ne(gt_score[j], 0.0), attribute_loss, torch.zeros(attribute_loss.shape).cuda())
-            attribute_losses.append(torch.mean(attribute_loss))
-        return torch.stack(attribute_losses).mean()
+        pred_score = torch.sigmoid(pred_score)     
+        attribute_loss = -(gt_score * torch.log(pred_score) + (1.0 - gt_score) * torch.log(1.0 - pred_score))
+        return torch.mean(attribute_loss)
 
 
 class BboxLoss(nn.Module):
@@ -312,3 +307,5 @@ class BboxLoss(nn.Module):
             pred_dist.view(-1, self.reg_max + 1), target_right.view(-1), reduction='none').view(
             target_left.shape) * weight_right
         return (loss_left + loss_right).mean(-1, keepdim=True)
+
+        
