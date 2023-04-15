@@ -238,7 +238,8 @@ class AttributeLoss(nn.Module):
     def forward(self, pred_score, gt_score):
         batch_size = pred_score.shape[0]
         attribute_losses = []
-        for j in range(batch_size):          
+        for j in range(batch_size): 
+            pred_score = torch.sigmoid(pred_score)         
             attribute_loss = -(gt_score[j] * torch.log(pred_score[j]) + (1.0 - gt_score[j]) * torch.log(1.0 - pred_score[j]))
             # attribute_loss = torch.where(torch.ne(gt_score[j], 0.0), attribute_loss, torch.zeros(attribute_loss.shape).cuda())
             attribute_losses.append(torch.mean(attribute_loss))
