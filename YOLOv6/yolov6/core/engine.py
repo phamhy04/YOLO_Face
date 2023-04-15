@@ -111,9 +111,7 @@ class Trainer:
                 self.train_in_loop(self.epoch, train_his)
                 with open("loss_his.json", 'w') as f:
                     json.dump(train_his, f)		
-                print("      Loss history saved!!!")
-                if self.epoch == 99:
-                    break		
+                print("   => Loss history saved!!!")
             self.strip_model()
 
         except Exception as _:
