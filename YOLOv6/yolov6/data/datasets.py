@@ -122,6 +122,7 @@ class TrainValDataset(Dataset):
             shapes = (h0, w0), ((h * ratio / h0, w * ratio / w0), pad)  # for COCO mAP rescaling
 
             labels = self.labels[index].copy()
+            labels[labels == -1] = 0
             if labels.size:
                 w *= ratio
                 h *= ratio
