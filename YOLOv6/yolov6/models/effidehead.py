@@ -108,7 +108,6 @@ class Detect(nn.Module):
                 #   Bounding box
                 reg_distri_list.append(reg_output.flatten(2).permute((0, 2, 1)))
                 #   Attribute
-                attr_output = torch.sigmoid(attr_output)
                 attr_score_list.append(attr_output.flatten(2).permute((0, 2, 1)))
                 
             cls_score_list = torch.cat(cls_score_list, axis=1)
