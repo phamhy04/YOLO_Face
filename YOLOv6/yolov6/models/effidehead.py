@@ -41,12 +41,14 @@ class Detect(nn.Module):
 
         # Efficient decoupled head layers
         for i in range(num_layers):
-            idx = i*5
+            idx = i*7
             self.stems.append(head_layers[idx])
             self.cls_convs.append(head_layers[idx+1])
             self.reg_convs.append(head_layers[idx+2])
-            self.cls_preds.append(head_layers[idx+3])
-            self.reg_preds.append(head_layers[idx+4])
+            self.attr_convs.append(head_layers[idx+3])
+            self.cls_preds.append(head_layers[idx+4])
+            self.reg_preds.append(head_layers[idx+5])
+            self.attr_preds.append(head_layers[idx+6])
 
     def initialize_biases(self):
         for conv in self.cls_preds:
@@ -97,7 +99,8 @@ class Detect(nn.Module):
                 reg_output = self.reg_preds[i](reg_feat)
                 #   Attribute
                 attr_feat = self.attr_convs[i](attr_x)
-                attr_output = self.attr_preds[i](attr_feat)                
+                attr_output = self.attr_preds[i](attr_feat)
+                
 
                 #   Classification
                 cls_output = torch.sigmoid(cls_output)
@@ -105,6 +108,7 @@ class Detect(nn.Module):
                 #   Bounding box
                 reg_distri_list.append(reg_output.flatten(2).permute((0, 2, 1)))
                 #   Attribute
+                attr_output = torch.sigmoid(attr_output)
                 attr_score_list.append(attr_output.flatten(2).permute((0, 2, 1)))
                 
             cls_score_list = torch.cat(cls_score_list, axis=1)
@@ -112,7 +116,6 @@ class Detect(nn.Module):
             attr_score_list = torch.cat(attr_score_list, axis=1)
 
             return x, cls_score_list, reg_distri_list, attr_score_list
-        
         else:
             cls_score_list = []
             reg_dist_list = []
@@ -302,7 +305,7 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
             in_channels=channels_list[chx[2]],
             out_channels=num_attr * num_anchors,
             kernel_size=1
-        ),
+        )
     )
 
     if num_layers == 4:
