@@ -186,6 +186,13 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
             kernel_size=3,
             stride=1
         ),
+        # attr_conv0
+        Conv(
+            in_channels=channels_list[chx[0]],
+            out_channels=channels_list[chx[0]],
+            kernel_size=3,
+            stride=1
+        ),
         # cls_pred0
         nn.Conv2d(
             in_channels=channels_list[chx[0]],
@@ -196,6 +203,12 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         nn.Conv2d(
             in_channels=channels_list[chx[0]],
             out_channels=4 * (reg_max + num_anchors),
+            kernel_size=1
+        ),
+        # attr_pred0
+        nn.Conv2d(
+            in_channels=channels_list[chx[0]],
+            out_channels=num_attr * num_anchors,
             kernel_size=1
         ),
         # stem1
@@ -219,6 +232,13 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
             kernel_size=3,
             stride=1
         ),
+        # attr_conv1
+        Conv(
+            in_channels=channels_list[chx[1]],
+            out_channels=channels_list[chx[1]],
+            kernel_size=3,
+            stride=1
+        ),
         # cls_pred1
         nn.Conv2d(
             in_channels=channels_list[chx[1]],
@@ -229,6 +249,12 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         nn.Conv2d(
             in_channels=channels_list[chx[1]],
             out_channels=4 * (reg_max + num_anchors),
+            kernel_size=1
+        ),
+        # attr_pred1
+        nn.Conv2d(
+            in_channels=channels_list[chx[1]],
+            out_channels=num_attr * num_anchors,
             kernel_size=1
         ),
         # stem2
@@ -252,6 +278,13 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
             kernel_size=3,
             stride=1
         ),
+        # attr_conv2
+        Conv(
+            in_channels=channels_list[chx[2]],
+            out_channels=channels_list[chx[2]],
+            kernel_size=3,
+            stride=1
+        ),
         # cls_pred2
         nn.Conv2d(
             in_channels=channels_list[chx[2]],
@@ -262,6 +295,12 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         nn.Conv2d(
             in_channels=channels_list[chx[2]],
             out_channels=4 * (reg_max + num_anchors),
+            kernel_size=1
+        ),
+        # attr_pred2
+        nn.Conv2d(
+            in_channels=channels_list[chx[2]],
+            out_channels=num_attr * num_anchors,
             kernel_size=1
         ),
     )
