@@ -69,7 +69,7 @@ class Detect(nn.Module):
 
         for conv in self.attr_preds:
             b = conv.bias.view(-1, )
-            b.data.fill_(1.0)
+            b.data.fill_(-math.log((1 - self.prior_prob) / self.prior_prob))
             conv.bias = torch.nn.Parameter(b.view(-1), requires_grad=True)
             w = conv.weight
             w.data.fill_(0.)
@@ -90,7 +90,6 @@ class Detect(nn.Module):
                 x[i] = self.stems[i](x[i])
                 cls_x = x[i]
                 reg_x = x[i]
-                attr_x = x[i]
                 #   Classification
                 cls_feat = self.cls_convs[i](cls_x)
                 cls_output = self.cls_preds[i](cls_feat)
@@ -98,8 +97,8 @@ class Detect(nn.Module):
                 reg_feat = self.reg_convs[i](reg_x)
                 reg_output = self.reg_preds[i](reg_feat)
                 #   Attribute
-                attr_feat = self.attr_convs[i](attr_x)
-                attr_output = self.attr_preds[i](attr_feat)                
+                attr_feat = self.attr_convs[i](reg_output)
+                attr_output = self.attr_preds[i](attr_feat) 
 
                 #   Classification
                 cls_output = torch.sigmoid(cls_output)
@@ -113,7 +112,13 @@ class Detect(nn.Module):
             reg_distri_list = torch.cat(reg_distri_list, axis=1)
             attr_score_list = torch.cat(attr_score_list, axis=1)
 
+            # print(""*20)
+            # print(cls_score_list.shape)
+            # print(reg_distri_list.shape)
+            # print(attr_score_list.shape)
+
             return x, cls_score_list, reg_distri_list, attr_score_list
+        
         else:
             cls_score_list = []
             reg_dist_list = []
@@ -127,12 +132,11 @@ class Detect(nn.Module):
                 x[i] = self.stems[i](x[i])
                 cls_x = x[i]
                 reg_x = x[i]
-                attr_x = x[i]
                 cls_feat = self.cls_convs[i](cls_x)
                 cls_output = self.cls_preds[i](cls_feat)
                 reg_feat = self.reg_convs[i](reg_x)
                 reg_output = self.reg_preds[i](reg_feat)
-                attr_feat = self.attr_convs[i](attr_x)
+                attr_feat = self.attr_convs[i](reg_output)
                 attr_output = self.attr_preds[i](attr_feat)
 
                 if self.use_dfl:
@@ -189,8 +193,8 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         ),
         # attr_conv0
         Conv(
-            in_channels=channels_list[chx[0]],
-            out_channels=channels_list[chx[0]],
+            in_channels=4,
+            out_channels=4,
             kernel_size=3,
             stride=1
         ),
@@ -208,7 +212,7 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         ),
         # attr_pred0
         nn.Conv2d(
-            in_channels=channels_list[chx[0]],
+            in_channels=4,
             out_channels=num_attr * num_anchors,
             kernel_size=1
         ),
@@ -235,8 +239,8 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         ),
         # attr_conv1
         Conv(
-            in_channels=channels_list[chx[1]],
-            out_channels=channels_list[chx[1]],
+            in_channels=4,
+            out_channels=4,
             kernel_size=3,
             stride=1
         ),
@@ -254,7 +258,7 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         ),
         # attr_pred1
         nn.Conv2d(
-            in_channels=channels_list[chx[1]],
+            in_channels=4,
             out_channels=num_attr * num_anchors,
             kernel_size=1
         ),
@@ -281,8 +285,8 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         ),
         # attr_conv2
         Conv(
-            in_channels=channels_list[chx[2]],
-            out_channels=channels_list[chx[2]],
+            in_channels=4,
+            out_channels=4,
             kernel_size=3,
             stride=1
         ),
@@ -300,7 +304,7 @@ def build_effidehead_layer(channels_list, num_anchors, num_classes, num_attr=40,
         ),
         # attr_pred2
         nn.Conv2d(
-            in_channels=channels_list[chx[2]],
+            in_channels=4,
             out_channels=num_attr * num_anchors,
             kernel_size=1
         )
