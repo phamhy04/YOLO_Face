@@ -157,7 +157,8 @@ class Detect(nn.Module):
                 [
                     pred_bboxes,
                     torch.ones((b, pred_bboxes.shape[1], 1), device=pred_bboxes.device, dtype=pred_bboxes.dtype),
-                    cls_score_list
+                    cls_score_list, 
+                    attr_score_list
                 ],
                 axis=-1)
 
