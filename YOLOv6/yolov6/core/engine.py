@@ -523,8 +523,9 @@ class Trainer:
                 # draw top n bbox
                 if box_score < vis_conf or bbox_idx > vis_max_box_num:
                     break
-                cv2.rectangle(ori_img, (x_tl, y_tl), (x_br, y_br), tuple([int(x) for x in self.color[cls_id]]), thickness=1)
-                cv2.putText(ori_img, f"{self.data_dict['names'][cls_id]}: {box_score:.2f}", (x_tl, y_tl - 10), cv2.FONT_HERSHEY_COMPLEX, 0.5, tuple([int(x) for x in self.color[cls_id]]), thickness=1)
+		colors = [(255, 0, 0), (0, 255, 0), [0, 0, 255], [255, 255, 0], [0, 255, 255], [255, 0, 255]]
+                cv2.rectangle(ori_img, (x_tl, y_tl), (x_br, y_br), colors[np.random.choice(np.arange(6))], thickness=1)
+                cv2.putText(ori_img, f"{self.data_dict['names'][cls_id]}: {box_score:.2f}", (x_tl, y_tl - 10), cv2.FONT_HERSHEY_COMPLEX, 0.5, colors[np.random.choice(np.arange(6))], thickness=1)
             self.vis_imgs_list.append(torch.from_numpy(ori_img[:, :, ::-1].copy()))
 
 
