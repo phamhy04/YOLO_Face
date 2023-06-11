@@ -46,6 +46,7 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
 
     num_classes = prediction.shape[2] - 5  # number of classes
     pred_candidates = torch.logical_and(prediction[..., 4] > conf_thres, torch.max(prediction[..., 5:], axis=-1)[0] > conf_thres)  # candidates
+
     # Check the parameters.
     assert 0 <= conf_thres <= 1, f'conf_thresh must be in 0.0 to 1.0, however {conf_thres} is provided.'
     assert 0 <= iou_thres <= 1, f'iou_thres must be in 0.0 to 1.0, however {iou_thres} is provided.'
@@ -57,27 +58,30 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
     multi_label &= num_classes > 1  # multiple labels per box
 
     tik = time.time()
-    output = [torch.zeros((0, 6), device=prediction.device)] * prediction.shape[0]
+    output = [torch.zeros((0, 46), device=prediction.device)] * prediction.shape[0]     #   prediction.shape[0] = batch_size
     for img_idx, x in enumerate(prediction):  # image index, image inference
+        print(x.shape)
         x = x[pred_candidates[img_idx]]  # confidence
-
         # If no box remains, skip the next process.
         if not x.shape[0]:
             continue
 
         # confidence multiply the objectness
-        x[:, 5:] *= x[:, 4:5]  # conf = obj_conf * cls_conf
+        x[:, 5:-40] *= x[:, 4:5]  # conf = obj_conf * cls_conf
 
         # (center x, center y, width, height) to (x1, y1, x2, y2)
         box = xywh2xyxy(x[:, :4])
 
+        # face attributes
+        attrs = x[:, -40:]
+
         # Detections matrix's shape is  (n,6), each row represents (xyxy, conf, cls)
         if multi_label:
-            box_idx, class_idx = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
+            box_idx, class_idx = (x[:, 5:-40] > conf_thres).nonzero(as_tuple=False).T
             x = torch.cat((box[box_idx], x[box_idx, class_idx + 5, None], class_idx[:, None].float()), 1)
         else:  # Only keep the class with highest scores.
-            conf, class_idx = x[:, 5:].max(1, keepdim=True)
-            x = torch.cat((box, conf, class_idx.float()), 1)[conf.view(-1) > conf_thres]
+            conf, class_idx = x[:, 5:-40].max(1, keepdim=True)
+            x = torch.cat((box, conf, class_idx.float(), attrs), 1)[conf.view(-1) > conf_thres]
 
         # Filter by class, only keep boxes whose category is in classes.
         if classes is not None:
@@ -96,7 +100,7 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
         keep_box_idx = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
         if keep_box_idx.shape[0] > max_det:  # limit detections
             keep_box_idx = keep_box_idx[:max_det]
-
+        
         output[img_idx] = x[keep_box_idx]
         if (time.time() - tik) > time_limit:
             print(f'WARNING: NMS cost time exceed the limited {time_limit}s.')
