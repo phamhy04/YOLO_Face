@@ -60,7 +60,6 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
     tik = time.time()
     output = [torch.zeros((0, 46), device=prediction.device)] * prediction.shape[0]     #   prediction.shape[0] = batch_size
     for img_idx, x in enumerate(prediction):  # image index, image inference
-        print(x.shape)
         x = x[pred_candidates[img_idx]]  # confidence
         # If no box remains, skip the next process.
         if not x.shape[0]:
